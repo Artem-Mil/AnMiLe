@@ -274,7 +274,9 @@ function renderLevels(m) {
     const unlocked = isTierUnlocked(tier.id);
     const mastery = getTierMastery(tier.id);
 
-    html += `<div class="tier-title">${tier.name} ${unlocked ? `· ${mastery}%` : '· 🔒 Complete ${tier.id === 'intermediate' ? 'Elementary' : 'Intermediate'} (80%)'}</div>`;
+    const prevTier = tier.id === 'intermediate' ? 'Elementary' : 'Intermediate';
+    const tierLabel = unlocked ? `· ${mastery}%` : `· 🔒 Complete ${prevTier} (80%)`;
+    html += `<div class="tier-title">${tier.name} ${tierLabel}</div>`;
 
     for (const lvl of tier.levels) {
       if (!HSK[lvl]) continue;
