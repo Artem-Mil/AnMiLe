@@ -97,6 +97,23 @@
   .stat-num{font-size:32px;font-weight:700;color:var(--seal)}
   .stat-label{font-size:12px;color:var(--faint);margin-top:4px;text-transform:uppercase;letter-spacing:.1em}
 
+  /* Add Form */
+  .form-group{margin-bottom:16px}
+  .form-label{font-size:13px;color:var(--faint);margin-bottom:6px;text-transform:uppercase;letter-spacing:.1em}
+  .form-input{width:100%;padding:14px 16px;border:1.5px solid var(--line);border-radius:10px;background:var(--card);
+              color:var(--ink);font-family:var(--ui);font-size:16px;outline:none}
+  .form-input:focus{border-color:var(--seal)}
+  .form-input.hanzi{font-family:var(--han);font-size:24px;text-align:center}
+  .custom-card{display:flex;align-items:center;gap:12px;padding:14px;background:var(--card);
+               border:1.5px solid var(--line);border-radius:10px;margin-bottom:8px}
+  .custom-card .han{font-family:var(--han);font-size:24px;color:var(--seal-dark)}
+  .custom-card .details{flex:1}
+  .custom-card .pin{font-size:14px;color:var(--ink)}
+  .custom-card .eng{font-size:13px;color:var(--faint)}
+  .custom-card .del{width:32px;height:32px;border:none;background:transparent;color:var(--faint);
+                    font-size:18px;cursor:pointer;border-radius:6px}
+  .custom-card .del:hover{background:var(--line);color:var(--seal)}
+
   @media (prefers-reduced-motion: no-preference){
     .flash{transition:transform .08s ease}
     .flash:active{transform:scale(.985)}
@@ -120,6 +137,7 @@
   <nav>
     <button id="tab-levels" class="on">LEVELS</button>
     <button id="tab-study">STUDY</button>
+    <button id="tab-add">ADD</button>
     <button id="tab-stats">STATS</button>
   </nav>
 </div>
@@ -132,7 +150,9 @@ const esc=s=>(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','
 
 // ---------- Storage ----------
 const PROGRESS_KEY = 'hsk-progress-v1';
+const CUSTOM_KEY = 'hsk-custom-v1';
 let progress = {};  // { level: { mastered: Set, seen: Set } }
+let customCards = [];  // [{ h, p, e }]
 let storageOk = true;
 
 function loadProgress() {
@@ -160,6 +180,19 @@ function saveProgress() {
       };
     }
     localStorage.setItem(PROGRESS_KEY, JSON.stringify(data));
+  } catch(e) { storageOk = false; }
+}
+
+function loadCustomCards() {
+  try {
+    const raw = localStorage.getItem(CUSTOM_KEY);
+    if (raw) customCards = JSON.parse(raw);
+  } catch(e) { storageOk = false; }
+}
+
+function saveCustomCards() {
+  try {
+    localStorage.setItem(CUSTOM_KEY, JSON.stringify(customCards));
   } catch(e) { storageOk = false; }
 }
 
@@ -245,6 +278,7 @@ function render() {
   document.querySelectorAll('nav button').forEach(b => b.classList.remove('on'));
   if (view === 'levels') $('tab-levels').classList.add('on');
   else if (view.startsWith('study')) $('tab-study').classList.add('on');
+  else if (view === 'add') $('tab-add').classList.add('on');
   else if (view === 'stats') $('tab-stats').classList.add('on');
 
   // Update header progress
@@ -258,6 +292,7 @@ function render() {
   if (view === 'levels') renderLevels(m);
   else if (view === 'levelDetail') renderLevelDetail(m);
   else if (view === 'study') renderStudy(m);
+  else if (view === 'add') renderAdd(m);
   else if (view === 'stats') renderStats(m);
 }
 
@@ -391,10 +426,33 @@ function renderLevelDetail(m) {
 function renderStudy(m) {
   const cur = queue[0];
   const lvl = currentLevel;
+  const isCustom = lvl === 'custom';
   const total = queue.length + sessionStats.correct + sessionStats.again;
 
   if (!cur) {
     // Session complete
+    if (isCustom) {
+      m.innerHTML = `
+        <div class="center">
+          <div class="huge" style="color:var(--green)">好</div>
+          <div style="font-size:18px">Session Complete!</div>
+          <div class="stats-grid" style="margin-top:20px">
+            <div class="stat-card">
+              <div class="stat-num" style="color:var(--green)">${sessionStats.correct}</div>
+              <div class="stat-label">Got it</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-num" style="color:var(--seal)">${sessionStats.again}</div>
+              <div class="stat-label">Again</div>
+            </div>
+          </div>
+          <button class="btn" id="backToAdd">Back to Custom Cards</button>
+        </div>`;
+
+      $('backToAdd').onclick = () => { view = 'add'; render(); };
+      return;
+    }
+
     const p = getProgress(lvl);
     const pct = getMasteryPercent(lvl);
 
@@ -437,10 +495,12 @@ function renderStudy(m) {
        <div class="mid-han">${esc(cur.h)}</div>
        <div class="mid-eng">${esc(cur.e)}</div>`;
 
+  const levelLabel = isCustom ? 'CUSTOM' : `HSK ${lvl}`;
+
   m.innerHTML = `
     <div class="prog">${done} / ${total} · ${queue.length} left</div>
     <div class="flash" id="flash">
-      <div class="level-tag">HSK ${lvl}</div>
+      <div class="level-tag">${levelLabel}</div>
       <div class="tag">${flipped ? 'ANSWER' : 'TAP TO FLIP'}</div>
       ${face}
       ${(flipped || front === 'hanzi') ? '<button class="spk" id="spkBtn" aria-label="Play pronunciation">🔊</button>' : ''}
@@ -456,9 +516,11 @@ function renderStudy(m) {
   if (sb) sb.onclick = (e) => { e.stopPropagation(); speak(cur.h); };
 
   $('aAgain').onclick = () => {
-    const p = getProgress(lvl);
-    p.seen.add(cur.h);
-    saveProgress();
+    if (!isCustom) {
+      const p = getProgress(lvl);
+      p.seen.add(cur.h);
+      saveProgress();
+    }
 
     const [c, ...rest] = queue;
     queue = [...rest, c];  // Move to back
@@ -468,10 +530,12 @@ function renderStudy(m) {
   };
 
   $('aGot').onclick = () => {
-    const p = getProgress(lvl);
-    p.seen.add(cur.h);
-    p.mastered.add(cur.h);
-    saveProgress();
+    if (!isCustom) {
+      const p = getProgress(lvl);
+      p.seen.add(cur.h);
+      p.mastered.add(cur.h);
+      saveProgress();
+    }
 
     queue = queue.slice(1);
     sessionStats.correct++;
@@ -547,20 +611,101 @@ function renderStats(m) {
   };
 }
 
+function renderAdd(m) {
+  let cardsHtml = '';
+  if (customCards.length === 0) {
+    cardsHtml = '<div class="hint" style="text-align:center;margin:20px 0">No custom cards yet</div>';
+  } else {
+    cardsHtml = '<div class="tier-title">Your Cards (' + customCards.length + ')</div>';
+    for (let i = 0; i < customCards.length; i++) {
+      const c = customCards[i];
+      cardsHtml += `
+        <div class="custom-card">
+          <div class="han">${esc(c.h)}</div>
+          <div class="details">
+            <div class="pin">${esc(c.p)}</div>
+            <div class="eng">${esc(c.e)}</div>
+          </div>
+          <button class="del" data-idx="${i}" title="Delete">×</button>
+        </div>`;
+    }
+  }
+
+  m.innerHTML = `
+    <div style="padding:10px 0">
+      <div class="tier-title" style="margin-top:0">Add Custom Card</div>
+      <div class="form-group">
+        <div class="form-label">Hanzi (汉字)</div>
+        <input type="text" id="addHanzi" class="form-input hanzi" placeholder="你好">
+      </div>
+      <div class="form-group">
+        <div class="form-label">Pinyin</div>
+        <input type="text" id="addPinyin" class="form-input" placeholder="nǐ hǎo">
+      </div>
+      <div class="form-group">
+        <div class="form-label">English</div>
+        <input type="text" id="addEnglish" class="form-input" placeholder="hello">
+      </div>
+      <button class="btn" id="addCardBtn">Add Card</button>
+
+      ${cardsHtml}
+
+      ${customCards.length > 0 ? '<button class="btn ghost" id="studyCustom" style="margin-top:12px">Study Custom Cards</button>' : ''}
+    </div>`;
+
+  $('addCardBtn').onclick = () => {
+    const h = $('addHanzi').value.trim();
+    const p = $('addPinyin').value.trim();
+    const e = $('addEnglish').value.trim();
+
+    if (!h || !p || !e) {
+      alert('Please fill in all fields');
+      return;
+    }
+
+    customCards.push({ h, p, e });
+    saveCustomCards();
+    render();
+  };
+
+  m.querySelectorAll('.del').forEach(btn => {
+    btn.onclick = () => {
+      const idx = parseInt(btn.dataset.idx);
+      customCards.splice(idx, 1);
+      saveCustomCards();
+      render();
+    };
+  });
+
+  const studyBtn = $('studyCustom');
+  if (studyBtn) {
+    studyBtn.onclick = () => {
+      currentLevel = 'custom';
+      queue = shuffle([...customCards]);
+      sessionStats = { correct: 0, again: 0 };
+      flipped = false;
+      view = 'study';
+      render();
+    };
+  }
+}
+
 // ---------- Navigation ----------
 $('tab-levels').onclick = () => { view = 'levels'; render(); };
 $('tab-study').onclick = () => {
-  if (currentLevel && HSK[currentLevel]) {
+  if (currentLevel && (HSK[currentLevel] || currentLevel === 'custom')) {
     view = 'levelDetail';
   } else {
     view = 'levels';
   }
   render();
 };
+$('tab-add').onclick = () => { view = 'add'; render(); };
 $('tab-stats').onclick = () => { view = 'stats'; render(); };
 
 // ---------- Init ----------
 loadProgress();
+loadCustomCards();
 render();
 
 // Preload voices
