@@ -1,17 +1,16 @@
 <!DOCTYPE html>
-<!-- saved from url=(0043)file:///C:/Users/artem/Downloads/index.html -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="color-scheme" content="light dark">
-<title>字卡 Flashcards</title>
+<title>字卡 HSK Flashcards</title>
 <style>
   :root{
     color-scheme:light dark;
     --paper:#F5F3EC; --ink:#211F1C; --faint:#8A8578; --line:#DDD8CC;
     --seal:#BE3A2B; --seal-dark:#9E2F23; --card:#FFFFFF;
+    --green:#3E6B3A; --gold:#B8860B;
     --ui:'Avenir Next','Helvetica Neue',system-ui,sans-serif;
     --han:'Kaiti SC','STKaiti','KaiTi','Noto Serif SC',serif;
   }
@@ -19,6 +18,7 @@
     :root{
       --paper:#201E1B; --ink:#EDE9E0; --faint:#9A9385; --line:#3B382F;
       --seal:#C64B3B; --seal-dark:#E08573; --card:#2B2823;
+      --green:#5A9B52; --gold:#DAA520;
     }
     .banner{background:#4A2521 !important;color:#F5B8AC !important}
     .seal{box-shadow:2px 2px 0 rgba(0,0,0,.4)}
@@ -34,43 +34,52 @@
   .logo-sub{font-size:11px;letter-spacing:.18em;color:var(--faint);margin-top:4px}
   .seal{width:46px;height:46px;background:var(--seal);border-radius:6px;display:flex;align-items:center;
         justify-content:center;color:#fff;font-family:var(--han);font-size:17px;box-shadow:2px 2px 0 var(--line)}
-  main{flex:1;display:flex;flex-direction:column;padding:20px}
+  main{flex:1;display:flex;flex-direction:column;padding:20px;overflow-y:auto}
   nav{display:flex;border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom);background:var(--paper)}
   nav button{flex:1;padding:15px 0;background:none;border:none;border-top:3px solid transparent;
              color:var(--faint);font-family:var(--ui);font-size:13px;letter-spacing:.12em;cursor:pointer}
   nav button.on{border-top-color:var(--seal);color:var(--ink)}
-  textarea{width:100%;padding:16px;font-size:18px;font-family:var(--ui);background:var(--card);
-           border:1.5px solid var(--line);border-radius:10px;color:var(--ink);resize:vertical;outline:none}
   .hint{font-size:14px;color:var(--faint);margin-bottom:12px}
   .btn{display:block;width:100%;padding:16px 24px;border-radius:10px;border:none;background:var(--seal);
        color:#fff;font-family:var(--ui);font-size:16px;font-weight:600;cursor:pointer;margin-top:12px}
-  .btn:disabled{opacity:.45}
+  .btn:disabled{opacity:.45;cursor:not-allowed}
   .btn.ghost{background:transparent;border:1.5px solid var(--line);color:var(--ink)}
-  .err{color:var(--seal-dark);font-size:14px;margin-top:10px}
-  .ok{color:#3E6B3A;font-size:14px;margin-top:10px}
-  /* resolver */
-  .resolve-word{font-size:22px;font-weight:600;margin:6px 0 2px}
-  .cand{display:flex;align-items:center;gap:14px;padding:13px 14px;background:var(--card);
-        border:1.5px solid var(--line);border-radius:12px;margin-top:10px;cursor:pointer;width:100%;
-        font-family:var(--ui);text-align:left;font-size:15px;color:var(--ink)}
-  .cand .h{font-family:var(--han);font-size:30px;min-width:56px}
-  .cand .p{font-weight:600}
-  .cand .e{color:var(--faint);font-size:13px;margin-top:2px}
-  .row2{display:flex;gap:10px;margin-top:12px}
-  .row2 .btn{margin-top:0}
-  input[type=text]{width:100%;padding:13px 14px;font-size:17px;border:1.5px solid var(--line);
-       border-radius:10px;background:var(--card);color:var(--ink);outline:none;margin-top:10px;font-family:var(--ui)}
-  /* study */
+  .center{margin:auto 0;text-align:center;display:flex;flex-direction:column;gap:18px}
+  .huge{font-family:var(--han);font-size:72px}
+  .pill-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+  .pill{padding:10px 18px;border-radius:999px;border:1.5px solid var(--line);background:transparent;
+        color:var(--ink);font-size:14px;font-weight:600;cursor:pointer;font-family:var(--ui)}
+  .pill.on{border-color:var(--seal);background:var(--seal);color:#fff}
+  .hidden{display:none !important}
+
+  /* Level Selection */
+  .tier-title{font-size:13px;letter-spacing:.15em;color:var(--faint);margin:20px 0 10px;text-transform:uppercase}
+  .tier-title:first-child{margin-top:0}
+  .level-card{display:flex;align-items:center;gap:14px;padding:16px;background:var(--card);
+              border:1.5px solid var(--line);border-radius:12px;margin-bottom:10px;cursor:pointer}
+  .level-card.locked{opacity:.5;cursor:not-allowed}
+  .level-card.locked .level-icon{background:var(--faint)}
+  .level-card.completed .level-icon{background:var(--green)}
+  .level-icon{width:44px;height:44px;border-radius:10px;background:var(--seal);display:flex;
+              align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:16px}
+  .level-info{flex:1}
+  .level-name{font-weight:600;font-size:17px}
+  .level-meta{font-size:13px;color:var(--faint);margin-top:2px}
+  .level-progress{width:100%;height:6px;background:var(--line);border-radius:3px;margin-top:8px;overflow:hidden}
+  .level-progress-bar{height:100%;background:var(--seal);border-radius:3px;transition:width .3s}
+  .level-card.completed .level-progress-bar{background:var(--green)}
+  .lock-icon{font-size:20px;color:var(--faint)}
+
+  /* Study */
   .prog{font-size:13px;color:var(--faint);letter-spacing:.1em;margin-bottom:14px}
   .flash{flex:1;min-height:320px;background:var(--card);border:1.5px solid var(--line);border-radius:16px;
          box-shadow:0 2px 0 rgba(0,0,0,.04);display:flex;flex-direction:column;align-items:center;
          justify-content:center;gap:12px;cursor:pointer;padding:24px;text-align:center;position:relative}
   .flash .tag{position:absolute;top:14px;right:16px;font-size:11px;letter-spacing:.15em;color:var(--faint)}
+  .flash .level-tag{position:absolute;top:14px;left:16px;font-size:11px;letter-spacing:.1em;color:var(--seal);font-weight:600}
   .spk{position:absolute;bottom:14px;right:14px;width:46px;height:46px;border-radius:999px;
        border:1.5px solid var(--line);background:var(--paper);font-size:20px;cursor:pointer;
        display:flex;align-items:center;justify-content:center}
-  .spk-sm{border:1.5px solid var(--line);background:transparent;border-radius:999px;width:38px;height:38px;
-       font-size:16px;cursor:pointer;flex:none}
   .flash .big-han{font-family:var(--han);font-size:84px;line-height:1.1}
   .flash .big-pin{font-size:38px;font-weight:500}
   .flash .big-eng{font-size:28px;font-weight:500;line-height:1.35}
@@ -81,23 +90,18 @@
   .answers button{flex:1;padding:18px 0;border-radius:12px;font-size:17px;font-weight:600;cursor:pointer;font-family:var(--ui)}
   .again{border:1.5px solid var(--line);background:transparent;color:var(--ink)}
   .gotit{border:none;background:var(--seal);color:#fff}
-  .center{margin:auto 0;text-align:center;display:flex;flex-direction:column;gap:18px}
-  .huge{font-family:var(--han);font-size:72px}
-  .pill-row{display:flex;gap:10px;justify-content:center}
-  .pill{padding:10px 18px;border-radius:999px;border:1.5px solid var(--line);background:transparent;
-        color:var(--ink);font-size:14px;font-weight:600;cursor:pointer;font-family:var(--ui)}
-  .pill.on{border-color:var(--seal);background:var(--seal);color:#fff}
-  /* deck */
-  .deck-item{display:flex;align-items:center;gap:14px;padding:14px 4px;border-bottom:1px solid var(--line)}
-  .deck-item .h{font-family:var(--han);font-size:26px;margin-left:auto;color:var(--seal-dark)}
-  .deck-item .p{font-size:17px;font-weight:600}
-  .deck-item .e{font-size:14px;color:var(--faint)}
-  .deck-item .del{border:none;background:none;color:var(--faint);font-size:22px;cursor:pointer;padding:8px}
-  .banner{padding:10px 20px;background:#FBEAE7;color:var(--seal-dark);font-size:13px;border-bottom:1px solid var(--line)}
-  .hidden{display:none !important}
+
+  /* Stats */
+  .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+  .stat-card{background:var(--card);border:1.5px solid var(--line);border-radius:12px;padding:16px;text-align:center}
+  .stat-num{font-size:32px;font-weight:700;color:var(--seal)}
+  .stat-label{font-size:12px;color:var(--faint);margin-top:4px;text-transform:uppercase;letter-spacing:.1em}
+
   @media (prefers-reduced-motion: no-preference){
     .flash{transition:transform .08s ease}
     .flash:active{transform:scale(.985)}
+    .level-card{transition:transform .1s ease}
+    .level-card:active:not(.locked){transform:scale(.98)}
   }
 </style>
 </head>
@@ -106,429 +110,461 @@
   <header>
     <div>
       <div class="logo-han">字卡</div>
-      <div class="logo-sub">ZÌKǍ · FLASHCARDS</div>
+      <div class="logo-sub">HSK · FLASHCARDS</div>
     </div>
-    <div class="seal" id="deckCount">100</div>
+    <div class="seal" id="totalProgress">0%</div>
   </header>
-  <div class="banner hidden" id="storageBanner">Saving is unavailable in this browser. Cards last only for this session.</div>
 
-  <main id="main">
-    <div class="center">
-      <div class="huge">学</div>
-      <div class="hint" style="margin:0">100 cards in the deck, shuffled each session.</div>
-      <div class="pill-row">
-        <button class="pill on" id="fPin">Pinyin first</button>
-        <button class="pill " id="fHan">汉字 first</button>
-        <button class="pill " id="fEng">English first</button>
-      </div>
-      <button class="btn" id="start">Start</button>
-    </div></main>
+  <main id="main"></main>
 
   <nav>
-    <button id="tab-add">ADD</button>
-    <button id="tab-study" class="on">STUDY</button>
-    <button id="tab-deck">DECK</button>
+    <button id="tab-levels" class="on">LEVELS</button>
+    <button id="tab-study">STUDY</button>
+    <button id="tab-stats">STATS</button>
   </nav>
 </div>
 
-<script src="dictionary.js"></script>
-<script src="starter.js"></script>
+<script src="hsk.js"></script>
 <script>
+// ---------- Helpers ----------
+const $=id=>document.getElementById(id);
+const esc=s=>(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
-// ---------- storage ----------
-const KEY = 'zh-cards-v1';
-let memCards = null, storageOk = true;
-function loadCards(){
-  try{ const s = localStorage.getItem(KEY); return s ? JSON.parse(s) : []; }
-  catch(e){ storageOk = false; return memCards || []; }
-}
-function saveCards(cards){
-  memCards = cards;
-  try{
-    localStorage.setItem(KEY, JSON.stringify(cards));
-    storageOk = localStorage.getItem(KEY) !== null;
-  }catch(e){ storageOk = false; }
-  document.getElementById('storageBanner').classList.toggle('hidden', storageOk);
+// ---------- Storage ----------
+const PROGRESS_KEY = 'hsk-progress-v1';
+let progress = {};  // { level: { mastered: Set, seen: Set } }
+let storageOk = true;
+
+function loadProgress() {
+  try {
+    const raw = localStorage.getItem(PROGRESS_KEY);
+    if (raw) {
+      const data = JSON.parse(raw);
+      for (const lvl in data) {
+        progress[lvl] = {
+          mastered: new Set(data[lvl].mastered || []),
+          seen: new Set(data[lvl].seen || [])
+        };
+      }
+    }
+  } catch(e) { storageOk = false; }
 }
 
-// ---------- speech ----------
-let voices = [];
-let keepAlive = null; // hold a reference so iOS doesn't garbage-collect mid-speech
-function loadVoices(){ try{ voices = speechSynthesis.getVoices() || []; }catch(e){} }
-if('speechSynthesis' in window){
-  loadVoices();
-  try{ speechSynthesis.onvoiceschanged = loadVoices; }catch(e){}
-  // iOS often reports no voices until after the first user interaction; warm it up
-  document.addEventListener('touchstart', function warm(){
-    loadVoices();
-    try{ speechSynthesis.resume(); }catch(e){}
-    document.removeEventListener('touchstart', warm);
-  }, {once:true, passive:true});
+function saveProgress() {
+  try {
+    const data = {};
+    for (const lvl in progress) {
+      data[lvl] = {
+        mastered: Array.from(progress[lvl].mastered),
+        seen: Array.from(progress[lvl].seen)
+      };
+    }
+    localStorage.setItem(PROGRESS_KEY, JSON.stringify(data));
+  } catch(e) { storageOk = false; }
 }
-function zhVoice(){
-  loadVoices();
-  return voices.find(x => x.lang && x.lang.replace('_','-').toLowerCase().startsWith('zh-cn'))
-      || voices.find(x => x.lang && x.lang.replace('_','-').toLowerCase().startsWith('zh'));
+
+function getProgress(level) {
+  if (!progress[level]) progress[level] = { mastered: new Set(), seen: new Set() };
+  return progress[level];
 }
-function speak(t){
-  if(!('speechSynthesis' in window) || !t) return;
-  try{
-    speechSynthesis.cancel();  // clear any stuck queue
-    speechSynthesis.resume();  // iOS can silently sit in a paused state
+
+function getMasteryPercent(level) {
+  const p = getProgress(level);
+  const total = HSK[level] ? HSK[level].length : 0;
+  if (total === 0) return 0;
+  return Math.round((p.mastered.size / total) * 100);
+}
+
+function getTierMastery(tier) {
+  const levels = HSK_LEVELS[tier] || [];
+  let totalWords = 0, masteredWords = 0;
+  for (const lvl of levels) {
+    if (HSK[lvl]) {
+      totalWords += HSK[lvl].length;
+      masteredWords += getProgress(lvl).mastered.size;
+    }
+  }
+  return totalWords > 0 ? Math.round((masteredWords / totalWords) * 100) : 0;
+}
+
+function isTierUnlocked(tier) {
+  if (tier === 'elementary') return true;
+  if (tier === 'intermediate') return getTierMastery('elementary') >= 80;
+  if (tier === 'advanced') return getTierMastery('intermediate') >= 80;
+  return false;
+}
+
+function isLevelUnlocked(level) {
+  const info = HSK_INFO[level];
+  if (!info) return false;
+  return isTierUnlocked(info.tier);
+}
+
+// ---------- Voice ----------
+let keepAlive = null;
+function speak(t) {
+  if (!('speechSynthesis' in window) || !t) return;
+  try {
+    speechSynthesis.cancel();
+    speechSynthesis.resume();
     const u = new SpeechSynthesisUtterance(t);
     keepAlive = u;
-    u.lang = 'zh-CN'; u.rate = 0.85; u.volume = 1;
-    const v = zhVoice();
-    if(v) u.voice = v;
-    // small delay after cancel(); speaking immediately after cancel is flaky on iOS
-    setTimeout(()=>{
-      try{ speechSynthesis.speak(u); speechSynthesis.resume(); }catch(e){}
-    }, 80);
-  }catch(e){}
+    u.lang = 'zh-CN';
+    u.rate = 0.85;
+    u.volume = 1;
+    const voices = speechSynthesis.getVoices();
+    const zh = voices.find(v => v.lang.startsWith('zh'));
+    if (zh) u.voice = zh;
+    try { speechSynthesis.speak(u); speechSynthesis.resume(); } catch(e) {}
+  } catch(e) {}
 }
 
-// ---------- lookup ----------
-function normKey(w){
-  return (w||'').normalize('NFD').replace(/u\u0308/gi,'v').replace(/[\u0300-\u036f]/g,'')
-    .toLowerCase().replace(/[^a-zv]/g,'');
-}
-// split a run of pinyin letters into known dictionary words (longest match, with backtracking)
-function segment(k, memo){
-  memo = memo || {};
-  if(k === '') return [];
-  if(memo[k] !== undefined) return memo[k];
-  for(let L = Math.min(k.length, 18); L >= 1; L--){
-    const sub = k.slice(0, L);
-    if(DICT[sub]){
-      const rest = segment(k.slice(L), memo);
-      if(rest) return memo[k] = [DICT[sub][0]].concat(rest);
-    }
-  }
-  return memo[k] = null;
-}
-function composePhrase(words){
-  return {
-    h: words.map(x=>x.h).join(''),
-    p: words.map(x=>x.p).join(' '),
-    e: words.map(x=>{
-      const g = x.e.split(';')[0].trim();
-      const s = g.replace(/^\([^)]*\)\s*/,'').trim();
-      return s || g;
-    }).join(' \u00b7 ')
-  };
-}
-function normTones(w){
-  const digits = ((w||'').match(/[1-5]/g)||[]);
-  if(digits.length) return digits.join('');
-  const marks = [];
-  for(const ch of (w||'').normalize('NFD')){
-    if(ch==='\u0304') marks.push('1');
-    else if(ch==='\u0301') marks.push('2');
-    else if(ch==='\u030C') marks.push('3');
-    else if(ch==='\u0300') marks.push('4');
-  }
-  return marks.join('');
-}
-function lookup(word){
-  const k = normKey(word);
-  if(!k) return [];
-  let cands = DICT[k] || [];
-  const t = normTones(word);
-  if(t && cands.length){
-    const exact = cands.filter(c => c.t === t);
-    if(exact.length) cands = exact;
-  }
-  return cands;
-}
-
-// ---------- state ----------
-let cards = loadCards();
-let view = 'add';
+// ---------- State ----------
+let view = 'levels';
+let currentLevel = null;
+let queue = [];
+let flipped = false;
 let front = 'pinyin';
-try{ front = localStorage.getItem('zh-front') || 'pinyin'; }catch(e){}
-function setFront(f){ front = f; try{ localStorage.setItem('zh-front', f); }catch(e){} }
-let queue = [], flipped = false, doneCount = 0, totalCount = 0;
-let pending = [];       // words awaiting user choice
-let addedNow = 0;
+let sessionStats = { correct: 0, again: 0 };
 
-const $ = (id)=>document.getElementById(id);
-const esc = (s)=>String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
-function shuffle(a){ const x=[...a]; for(let i=x.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[x[i],x[j]]=[x[j],x[i]];} return x; }
-function persist(){ saveCards(cards); $('deckCount').textContent = cards.length; }
-
-// ---------- views ----------
-function render(){
-  ['add','study','deck'].forEach(t => $('tab-'+t).classList.toggle('on', view.startsWith(t)||(t==='study'&&view.startsWith('study'))));
-  $('deckCount').textContent = cards.length;
-  const m = $('main');
-  if(view==='add') return renderAdd(m);
-  if(view==='resolve') return renderResolve(m);
-  if(view==='study0') return renderStudyStart(m);
-  if(view==='study') return renderStudy(m);
-  if(view==='deck') return renderDeck(m);
-}
-
-function renderAdd(m){
-  m.innerHTML = `
-    <div class="hint">Type pinyin words or short phrases (wo hen lei). One per line, or separate with commas. Tones optional.</div>
-    <textarea id="inp" rows="7" placeholder="nihao&#10;pengyou&#10;xuexi"></textarea>
-    <div class="err hidden" id="addErr"></div>
-    <div class="ok hidden" id="addOk"></div>
-    <button class="btn" id="goAdd">Translate &amp; add to deck</button>
-    <button class="btn ghost" id="starterBtn">Add 100 starter words</button>
-    ${cards.length ? '<button class="btn ghost" id="goStudy">Go study ('+cards.length+' cards)</button>' : ''}
-  `;
-  $('goAdd').onclick = ()=>{
-    const raw = $('inp').value.split(/[\n,;]+/).map(s=>s.trim()).filter(Boolean);
-    if(!raw.length) return;
-    pending = []; addedNow = 0;
-    for(const w of raw){
-      const cands = lookup(w);
-      if(cands.length===1){
-        cards.push({id:uid(), hanzi:cands[0].h, pinyin:cands[0].p, english:cands[0].e});
-        addedNow++;
-        continue;
-      }
-      if(cands.length>1){ pending.push({word:w, cands}); continue; }
-      // no single-word match: try treating it as a phrase
-      let words = null;
-      if(!normTones(w)){
-        // no tone info given: longest dictionary match across the whole line
-        words = segment(normKey(w));
-      }else{
-        // tones given: resolve token by token so the tones can disambiguate
-        const parts = w.split(/\s+/).filter(Boolean);
-        words = [];
-        for(const p of parts){
-          const c = lookup(p);
-          if(c.length){ words.push(c[0]); }
-          else{
-            const seg = segment(normKey(p));
-            if(seg && seg.length){ words.push(...seg); } else { words = null; break; }
-          }
-        }
-      }
-      if(words && words.length > 1){
-        pending.push({word:w, cands:[composePhrase(words)], phrase:true});
-      }else if(words && words.length === 1){
-        pending.push({word:w, cands:[{h:words[0].h, p:words[0].p, e:words[0].e}]});
-      }else{
-        pending.push({word:w, cands:[]});
-      }
-    }
-    persist();
-    if(pending.length){ view='resolve'; render(); }
-    else{
-      $('inp').value='';
-      const ok=$('addOk'); ok.textContent = addedNow+' card'+(addedNow===1?'':'s')+' added.'; ok.classList.remove('hidden');
-    }
-  };
-  $('starterBtn').onclick = ()=>{
-    const have = new Set(cards.map(c=>c.hanzi+'|'+c.english));
-    let n=0;
-    for(const s of STARTER){
-      const sig = s.h+'|'+s.e;
-      if(have.has(sig)) continue;
-      cards.push({id:uid(), hanzi:s.h, pinyin:s.p, english:s.e});
-      have.add(sig); n++;
-    }
-    persist();
-    const ok=$('addOk');
-    ok.textContent = n ? n+' starter cards added. Deck: '+cards.length+'.' : 'Starter words are already in your deck.';
-    ok.classList.remove('hidden');
-  };
-  const gs = $('goStudy'); if(gs) gs.onclick = ()=>{ view='study0'; render(); };
-}
-
-function renderResolve(m){
-  if(!pending.length){
-    view='add'; render();
-    const ok=$('addOk'); if(ok){ ok.textContent = addedNow+' card'+(addedNow===1?'':'s')+' added.'; ok.classList.remove('hidden'); }
-    return;
+// ---------- Shuffle ----------
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
   }
-  const cur = pending[0];
-  const list = (cur.cands||[]).slice(0,6).map((c,i)=>`
-    <button class="cand" data-i="${i}">
-      <span class="h">${esc(c.h)}</span>
-      <span><div class="p">${esc(c.p)}</div><div class="e">${esc(c.e)}</div></span>
-    </button>`).join('');
-  m.innerHTML = `
-    <div class="hint">${cur.phrase ? 'Looks like a phrase. Tap to confirm, or enter it manually:' : cur.cands.length ? 'Several words match. Pick one:' : 'No dictionary match. Add it manually or skip.'}</div>
-    <div class="resolve-word">${esc(cur.word)}</div>
-    ${list}
-    <div class="${cur.cands.length?'hidden':''}" id="manualBox">
-      <input type="text" id="mHanzi" placeholder="Chinese characters, e.g. 你好">
-      <input type="text" id="mPinyin" placeholder="Pinyin with tones, e.g. nǐ hǎo">
-      <input type="text" id="mEng" placeholder="English meaning">
-      <button class="btn" id="mAdd">Add card</button>
-    </div>
-    <div class="row2">
-      ${cur.cands.length ? '<button class="btn ghost" id="manualToggle">Enter manually</button>' : ''}
-      <button class="btn ghost" id="skip">Skip this word</button>
-    </div>
-    <div class="hint" style="margin-top:14px">${pending.length-1} more to resolve after this.</div>
-  `;
-  m.querySelectorAll('.cand').forEach(b=>{
-    b.onclick = ()=>{
-      const c = cur.cands[parseInt(b.dataset.i)];
-      cards.push({id:uid(), hanzi:c.h, pinyin:c.p, english:c.e});
-      addedNow++; persist();
-      pending.shift(); render();
+  return a;
+}
+
+// ---------- Render ----------
+function render() {
+  const m = $('main');
+
+  // Update nav
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('on'));
+  if (view === 'levels') $('tab-levels').classList.add('on');
+  else if (view.startsWith('study')) $('tab-study').classList.add('on');
+  else if (view === 'stats') $('tab-stats').classList.add('on');
+
+  // Update header progress
+  let totalWords = 0, masteredWords = 0;
+  for (const lvl in HSK) {
+    totalWords += HSK[lvl].length;
+    masteredWords += getProgress(lvl).mastered.size;
+  }
+  $('totalProgress').textContent = totalWords > 0 ? Math.round((masteredWords / totalWords) * 100) + '%' : '0%';
+
+  if (view === 'levels') renderLevels(m);
+  else if (view === 'levelDetail') renderLevelDetail(m);
+  else if (view === 'study') renderStudy(m);
+  else if (view === 'stats') renderStats(m);
+}
+
+function renderLevels(m) {
+  let html = '';
+
+  const tiers = [
+    { id: 'elementary', name: 'Elementary', levels: [1, 2, 3] },
+    { id: 'intermediate', name: 'Intermediate', levels: [4, 5, 6] },
+    { id: 'advanced', name: 'Advanced', levels: [7, 8, 9] }
+  ];
+
+  for (const tier of tiers) {
+    const unlocked = isTierUnlocked(tier.id);
+    const mastery = getTierMastery(tier.id);
+
+    html += `<div class="tier-title">${tier.name} ${unlocked ? `· ${mastery}%` : '· 🔒 Complete ${tier.id === 'intermediate' ? 'Elementary' : 'Intermediate'} (80%)'}</div>`;
+
+    for (const lvl of tier.levels) {
+      if (!HSK[lvl]) continue;
+      const words = HSK[lvl].length;
+      const pct = getMasteryPercent(lvl);
+      const completed = pct >= 100;
+      const locked = !unlocked;
+
+      html += `
+        <div class="level-card ${locked ? 'locked' : ''} ${completed ? 'completed' : ''}" data-level="${lvl}">
+          <div class="level-icon">${lvl}</div>
+          <div class="level-info">
+            <div class="level-name">HSK Level ${lvl}</div>
+            <div class="level-meta">${words} words · ${pct}% mastered</div>
+            <div class="level-progress"><div class="level-progress-bar" style="width:${pct}%"></div></div>
+          </div>
+          ${locked ? '<span class="lock-icon">🔒</span>' : ''}
+        </div>`;
+    }
+  }
+
+  m.innerHTML = html;
+
+  m.querySelectorAll('.level-card:not(.locked)').forEach(card => {
+    card.onclick = () => {
+      currentLevel = parseInt(card.dataset.level);
+      view = 'levelDetail';
+      render();
     };
   });
-  const mAdd = $('mAdd');
-  if(mAdd) mAdd.onclick = ()=>{
-    const h=$('mHanzi').value.trim(), p=$('mPinyin').value.trim(), e=$('mEng').value.trim();
-    if(!h && !e) return;
-    cards.push({id:uid(), hanzi:h||cur.word, pinyin:p||cur.word, english:e||''});
-    addedNow++; persist();
-    pending.shift(); render();
-  };
-  const mt = $('manualToggle');
-  if(mt) mt.onclick = ()=>{ $('manualBox').classList.remove('hidden'); };
-  $('skip').onclick = ()=>{ pending.shift(); render(); };
 }
 
-function renderStudyStart(m){
+function renderLevelDetail(m) {
+  const lvl = currentLevel;
+  const words = HSK[lvl] || [];
+  const p = getProgress(lvl);
+  const pct = getMasteryPercent(lvl);
+  const newWords = words.filter(w => !p.seen.has(w.h));
+  const reviewWords = words.filter(w => p.seen.has(w.h) && !p.mastered.has(w.h));
+
   m.innerHTML = `
     <div class="center">
-      <div class="huge">&#23398;</div>
-      <div class="hint" style="margin:0">${cards.length} cards in the deck, shuffled each session.</div>
+      <div class="huge" style="color:var(--seal)">${lvl}</div>
+      <div style="font-size:20px;font-weight:600">HSK Level ${lvl}</div>
+      <div class="hint" style="margin:0">${words.length} words · ${pct}% mastered</div>
+
+      <div class="stats-grid" style="margin-top:20px">
+        <div class="stat-card">
+          <div class="stat-num">${newWords.length}</div>
+          <div class="stat-label">New</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">${reviewWords.length}</div>
+          <div class="stat-label">Review</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">${p.mastered.size}</div>
+          <div class="stat-label">Mastered</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">${p.seen.size}</div>
+          <div class="stat-label">Seen</div>
+        </div>
+      </div>
+
       <div class="pill-row">
         <button class="pill ${front==='pinyin'?'on':''}" id="fPin">Pinyin first</button>
-        <button class="pill ${front==='hanzi'?'on':''}" id="fHan">&#27721;&#23383; first</button>
+        <button class="pill ${front==='hanzi'?'on':''}" id="fHan">汉字 first</button>
         <button class="pill ${front==='english'?'on':''}" id="fEng">English first</button>
       </div>
-      <button class="btn" id="start" ${cards.length?'':'disabled'}>Start</button>
+
+      <button class="btn" id="studyNew" ${newWords.length === 0 ? 'disabled' : ''}>Learn New Words (${newWords.length})</button>
+      <button class="btn ghost" id="studyReview" ${reviewWords.length === 0 ? 'disabled' : ''}>Review (${reviewWords.length})</button>
+      <button class="btn ghost" id="studyAll">Study All (${words.length})</button>
+      <button class="btn ghost" id="backToLevels">← Back to Levels</button>
     </div>`;
-  $('fHan').onclick=()=>{setFront('hanzi');render();};
-  $('fPin').onclick=()=>{setFront('pinyin');render();};
-  $('fEng').onclick=()=>{setFront('english');render();};
-  $('start').onclick=()=>{
-    queue = shuffle(cards); totalCount = queue.length; doneCount = 0; flipped = false;
-    view='study'; render();
+
+  $('fHan').onclick = () => { front = 'hanzi'; render(); };
+  $('fPin').onclick = () => { front = 'pinyin'; render(); };
+  $('fEng').onclick = () => { front = 'english'; render(); };
+
+  $('studyNew').onclick = () => {
+    queue = shuffle(newWords.slice(0, 20));  // Learn 20 new words at a time
+    sessionStats = { correct: 0, again: 0 };
+    flipped = false;
+    view = 'study';
+    render();
+  };
+
+  $('studyReview').onclick = () => {
+    queue = shuffle(reviewWords);
+    sessionStats = { correct: 0, again: 0 };
+    flipped = false;
+    view = 'study';
+    render();
+  };
+
+  $('studyAll').onclick = () => {
+    queue = shuffle(words);
+    sessionStats = { correct: 0, again: 0 };
+    flipped = false;
+    view = 'study';
+    render();
+  };
+
+  $('backToLevels').onclick = () => {
+    view = 'levels';
+    render();
   };
 }
 
-function renderStudy(m){
+function renderStudy(m) {
   const cur = queue[0];
-  if(!cur){
+  const lvl = currentLevel;
+  const total = queue.length + sessionStats.correct + sessionStats.again;
+
+  if (!cur) {
+    // Session complete
+    const p = getProgress(lvl);
+    const pct = getMasteryPercent(lvl);
+
     m.innerHTML = `
       <div class="center">
-        <div class="huge" style="color:var(--seal)">&#22909;</div>
-        <div style="font-size:18px">Deck complete. ${totalCount} cards reviewed.</div>
-        <button class="btn" id="again">Run it again</button>
-        <button class="btn ghost" id="more">Add more words</button>
+        <div class="huge" style="color:var(--green)">好</div>
+        <div style="font-size:18px">Session Complete!</div>
+        <div class="stats-grid" style="margin-top:20px">
+          <div class="stat-card">
+            <div class="stat-num" style="color:var(--green)">${sessionStats.correct}</div>
+            <div class="stat-label">Got it</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num" style="color:var(--seal)">${sessionStats.again}</div>
+            <div class="stat-label">Again</div>
+          </div>
+        </div>
+        <div class="hint">Level ${lvl}: ${pct}% mastered</div>
+        <button class="btn" id="continueStudy">Continue Studying</button>
+        <button class="btn ghost" id="backToLevel">Back to Level ${lvl}</button>
       </div>`;
-    $('again').onclick=()=>{ queue=shuffle(cards); totalCount=queue.length; doneCount=0; flipped=false; render(); };
-    $('more').onclick=()=>{ view='add'; render(); };
+
+    $('continueStudy').onclick = () => {
+      view = 'levelDetail';
+      render();
+    };
+    $('backToLevel').onclick = () => {
+      view = 'levelDetail';
+      render();
+    };
     return;
   }
+
+  const done = sessionStats.correct + sessionStats.again;
   const face = !flipped
-    ? (front==='hanzi' ? `<div class="big-han">${esc(cur.hanzi)}</div>`
-       : front==='pinyin' ? `<div class="big-pin">${esc(cur.pinyin)}</div>`
-       : `<div class="big-eng">${esc(cur.english)}</div>`)
-    : `<div class="mid-pin">${esc(cur.pinyin)}</div>
-       <div class="mid-han">${esc(cur.hanzi)}</div>
-       <div class="mid-eng">${esc(cur.english)}</div>`;
+    ? (front === 'hanzi' ? `<div class="big-han">${esc(cur.h)}</div>`
+       : front === 'pinyin' ? `<div class="big-pin">${esc(cur.p)}</div>`
+       : `<div class="big-eng">${esc(cur.e)}</div>`)
+    : `<div class="mid-pin">${esc(cur.p)}</div>
+       <div class="mid-han">${esc(cur.h)}</div>
+       <div class="mid-eng">${esc(cur.e)}</div>`;
+
   m.innerHTML = `
-    <div class="prog">${doneCount} / ${totalCount} DONE &middot; ${queue.length} LEFT</div>
+    <div class="prog">${done} / ${total} · ${queue.length} left</div>
     <div class="flash" id="flash">
-      <div class="tag">${flipped?'ANSWER':'TAP TO FLIP'}</div>
+      <div class="level-tag">HSK ${lvl}</div>
+      <div class="tag">${flipped ? 'ANSWER' : 'TAP TO FLIP'}</div>
       ${face}
-      ${(flipped || front==='hanzi') ? '<button class="spk" id="spkBtn" aria-label="Play pronunciation">&#128266;</button>' : ''}
+      ${(flipped || front === 'hanzi') ? '<button class="spk" id="spkBtn" aria-label="Play pronunciation">🔊</button>' : ''}
     </div>
     <div class="answers">
       <button class="again" id="aAgain">Again</button>
       <button class="gotit" id="aGot">Got it</button>
     </div>`;
-  $('flash').onclick=()=>{ flipped=!flipped; render(); };
+
+  $('flash').onclick = () => { flipped = !flipped; render(); };
+
   const sb = $('spkBtn');
-  if(sb) sb.onclick = (e)=>{ e.stopPropagation(); speak(cur.hanzi); };
-  $('aAgain').onclick=()=>{ const [c,...rest]=queue; queue=[...rest,c]; flipped=false; render(); };
-  $('aGot').onclick=()=>{ queue=queue.slice(1); doneCount++; flipped=false; render(); };
+  if (sb) sb.onclick = (e) => { e.stopPropagation(); speak(cur.h); };
+
+  $('aAgain').onclick = () => {
+    const p = getProgress(lvl);
+    p.seen.add(cur.h);
+    saveProgress();
+
+    const [c, ...rest] = queue;
+    queue = [...rest, c];  // Move to back
+    sessionStats.again++;
+    flipped = false;
+    render();
+  };
+
+  $('aGot').onclick = () => {
+    const p = getProgress(lvl);
+    p.seen.add(cur.h);
+    p.mastered.add(cur.h);
+    saveProgress();
+
+    queue = queue.slice(1);
+    sessionStats.correct++;
+    flipped = false;
+    render();
+  };
 }
 
-function renderDeck(m){
-  if(!cards.length){
-    m.innerHTML = '<div class="hint">No cards yet. Add some pinyin first.</div>';
-    return;
+function renderStats(m) {
+  let totalWords = 0, masteredWords = 0, seenWords = 0;
+
+  for (const lvl in HSK) {
+    totalWords += HSK[lvl].length;
+    const p = getProgress(lvl);
+    masteredWords += p.mastered.size;
+    seenWords += p.seen.size;
   }
-  m.innerHTML = cards.map(c=>`
-    <div class="deck-item" data-id="${c.id}">
-      <span><div class="p">${esc(c.pinyin)}</div><div class="e">${esc(c.e||c.english)}</div></span>
-      <span class="h">${esc(c.hanzi)}</span>
-      <button class="spk-sm" aria-label="Play pronunciation">&#128266;</button>
-      <button class="del" aria-label="Delete card">&times;</button>
-    </div>`).join('') + `
-    <div class="row2" style="margin-top:18px">
-      <button class="btn ghost" id="exp">Export deck</button>
-      <button class="btn ghost" id="imp">Import deck</button>
-    </div>
-    <textarea id="ioBox" rows="4" class="hidden" style="margin-top:12px" placeholder="Paste an exported deck here, then tap Import again."></textarea>
-    <div class="ok hidden" id="ioMsg"></div>`;
-  m.querySelectorAll('.deck-item .spk-sm').forEach(b=>{
-    b.onclick = ()=>{
-      const id = b.closest('.deck-item').dataset.id;
-      const c = cards.find(x=>x.id===id);
-      if(c) speak(c.hanzi);
-    };
-  });
-  m.querySelectorAll('.deck-item .del').forEach(b=>{
-    b.onclick = ()=>{
-      const id = b.closest('.deck-item').dataset.id;
-      cards = cards.filter(x=>x.id!==id);
-      persist(); render();
-    };
-  });
-  $('exp').onclick = ()=>{
-    const box=$('ioBox'); box.classList.remove('hidden');
-    box.value = JSON.stringify(cards);
-    box.select();
-    try{ document.execCommand('copy'); const g=$('ioMsg'); g.textContent='Copied. Save it anywhere as backup.'; g.classList.remove('hidden'); }catch(e){}
-  };
-  $('imp').onclick = ()=>{
-    const box=$('ioBox');
-    if(box.classList.contains('hidden')){ box.classList.remove('hidden'); box.value=''; box.focus(); return; }
-    try{
-      const arr = JSON.parse(box.value);
-      if(!Array.isArray(arr)) throw 0;
-      const have = new Set(cards.map(c=>c.hanzi+'|'+c.english));
-      let n=0;
-      for(const c of arr){
-        if(!c.hanzi) continue;
-        const sig = c.hanzi+'|'+(c.english||'');
-        if(have.has(sig)) continue;
-        cards.push({id:uid(), hanzi:c.hanzi, pinyin:c.pinyin||'', english:c.english||''});
-        have.add(sig); n++;
-      }
-      persist();
-      const g=$('ioMsg'); g.textContent=n+' cards imported.'; g.classList.remove('hidden');
+
+  const elemMastery = getTierMastery('elementary');
+  const intMastery = getTierMastery('intermediate');
+
+  m.innerHTML = `
+    <div style="padding:10px 0">
+      <div class="tier-title" style="margin-top:0">Overall Progress</div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-num">${masteredWords}</div>
+          <div class="stat-label">Mastered</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">${seenWords}</div>
+          <div class="stat-label">Seen</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">${totalWords}</div>
+          <div class="stat-label">Total Words</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">${totalWords > 0 ? Math.round((masteredWords/totalWords)*100) : 0}%</div>
+          <div class="stat-label">Complete</div>
+        </div>
+      </div>
+
+      <div class="tier-title">Tier Progress</div>
+      <div class="level-card">
+        <div class="level-icon" style="background:${elemMastery >= 80 ? 'var(--green)' : 'var(--seal)'}">初</div>
+        <div class="level-info">
+          <div class="level-name">Elementary (HSK 1-3)</div>
+          <div class="level-meta">${elemMastery}% mastered${elemMastery >= 80 ? ' ✓' : ''}</div>
+          <div class="level-progress"><div class="level-progress-bar" style="width:${elemMastery}%;background:${elemMastery >= 80 ? 'var(--green)' : 'var(--seal)'}"></div></div>
+        </div>
+      </div>
+      <div class="level-card ${elemMastery < 80 ? 'locked' : ''}">
+        <div class="level-icon" style="background:${intMastery >= 80 ? 'var(--green)' : elemMastery >= 80 ? 'var(--seal)' : 'var(--faint)'}">中</div>
+        <div class="level-info">
+          <div class="level-name">Intermediate (HSK 4-6)</div>
+          <div class="level-meta">${elemMastery >= 80 ? `${intMastery}% mastered` : 'Complete Elementary to unlock'}</div>
+          <div class="level-progress"><div class="level-progress-bar" style="width:${intMastery}%;background:${intMastery >= 80 ? 'var(--green)' : 'var(--seal)'}"></div></div>
+        </div>
+        ${elemMastery < 80 ? '<span class="lock-icon">🔒</span>' : ''}
+      </div>
+
+      <div class="tier-title">Reset Progress</div>
+      <button class="btn ghost" id="resetProgress">Reset All Progress</button>
+    </div>`;
+
+  $('resetProgress').onclick = () => {
+    if (confirm('Are you sure you want to reset all progress? This cannot be undone.')) {
+      progress = {};
+      saveProgress();
       render();
-    }catch(e){
-      const g=$('ioMsg'); g.textContent='Could not read that. Paste the exported text exactly.'; g.classList.remove('hidden');
     }
   };
 }
 
-// ---------- tabs & boot ----------
-$('tab-add').onclick = ()=>{ view='add'; render(); };
-$('tab-study').onclick = ()=>{ view = cards.length ? 'study0' : 'add'; render(); };
-$('tab-deck').onclick = ()=>{ view='deck'; render(); };
-// first run: preload the 100 starter words automatically
-if(!cards.length){
-  let seeded = false;
-  try{ seeded = localStorage.getItem('zh-seeded') === '1'; }catch(e){}
-  if(!seeded){
-    for(const s of STARTER) cards.push({id:uid(), hanzi:s.h, pinyin:s.p, english:s.e});
-    try{ localStorage.setItem('zh-seeded','1'); }catch(e){}
+// ---------- Navigation ----------
+$('tab-levels').onclick = () => { view = 'levels'; render(); };
+$('tab-study').onclick = () => {
+  if (currentLevel && HSK[currentLevel]) {
+    view = 'levelDetail';
+  } else {
+    view = 'levels';
   }
-}
-saveCards(cards); // sets banner state
-view = cards.length ? 'study0' : 'add';
+  render();
+};
+$('tab-stats').onclick = () => { view = 'stats'; render(); };
+
+// ---------- Init ----------
+loadProgress();
 render();
+
+// Preload voices
+if ('speechSynthesis' in window) {
+  speechSynthesis.getVoices();
+  speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices();
+}
 </script>
-
-
 </body></html>
