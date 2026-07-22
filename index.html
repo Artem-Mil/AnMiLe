@@ -409,7 +409,7 @@ function render() {
     // Update nav
     document.querySelectorAll('nav button').forEach(b => b.classList.remove('on'));
     if (view === 'levels') $('tab-levels').classList.add('on');
-    else if (view.startsWith('study') || view === 'levelDetail') $('tab-study').classList.add('on');
+    else if (view.startsWith('study') || view === 'levelDetail' || view === 'selectLevel') $('tab-study').classList.add('on');
     else if (view === 'add') $('tab-add').classList.add('on');
     else if (view === 'stats' || view === 'difficult') $('tab-stats').classList.add('on');
 
@@ -425,6 +425,7 @@ function render() {
 
     if (view === 'levels') renderLevels(m);
     else if (view === 'levelDetail') renderLevelDetail(m);
+    else if (view === 'selectLevel') renderSelectLevel(m);
     else if (view === 'study') renderStudy(m);
     else if (view === 'add') renderAdd(m);
     else if (view === 'stats') renderStats(m);
@@ -481,6 +482,19 @@ function renderLevels(m) {
       render();
     };
   });
+}
+
+function renderSelectLevel(m) {
+  m.innerHTML = `
+    <div class="center">
+      <div class="huge" style="color:var(--faint)">学</div>
+      <div style="font-size:20px;font-weight:600">Select a Level</div>
+      <div class="hint" style="margin:0">Choose an HSK level to start studying</div>
+      <button class="btn" id="goToLevels">Browse Levels</button>
+    </div>`;
+
+  const btn = $('goToLevels');
+  if (btn) btn.onclick = () => { view = 'levels'; render(); };
 }
 
 function renderLevelDetail(m) {
@@ -566,8 +580,6 @@ function renderLevelDetail(m) {
   const studyAllBtn = $('studyAll');
   const backBtn = $('backToLevels');
 
-  console.log('Study buttons found:', { studyDue: !!studyDueBtn, studyNew: !!studyNewBtn, studyReview: !!studyReviewBtn, studyAll: !!studyAllBtn, back: !!backBtn });
-
   if (studyDueBtn) {
     studyDueBtn.onclick = () => {
       try {
@@ -633,7 +645,6 @@ function renderLevelDetail(m) {
 }
 
 function renderStudy(m) {
-  console.log('renderStudy called, queue length:', queue.length, 'level:', currentLevel);
   const cur = queue[0];
   const lvl = currentLevel;
   const isCustom = lvl === 'custom';
@@ -1075,7 +1086,7 @@ $('tab-study').onclick = () => {
   if (currentLevel && (HSK[currentLevel] || currentLevel === 'custom')) {
     view = 'levelDetail';
   } else {
-    view = 'levels';
+    view = 'selectLevel';
   }
   render();
 };
