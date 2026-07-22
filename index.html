@@ -403,29 +403,35 @@ function shuffle(arr) {
 
 // ---------- Render ----------
 function render() {
-  const m = $('main');
+  try {
+    const m = $('main');
 
-  // Update nav
-  document.querySelectorAll('nav button').forEach(b => b.classList.remove('on'));
-  if (view === 'levels') $('tab-levels').classList.add('on');
-  else if (view.startsWith('study') || view === 'levelDetail') $('tab-study').classList.add('on');
-  else if (view === 'add') $('tab-add').classList.add('on');
-  else if (view === 'stats' || view === 'difficult') $('tab-stats').classList.add('on');
+    // Update nav
+    document.querySelectorAll('nav button').forEach(b => b.classList.remove('on'));
+    if (view === 'levels') $('tab-levels').classList.add('on');
+    else if (view.startsWith('study') || view === 'levelDetail') $('tab-study').classList.add('on');
+    else if (view === 'add') $('tab-add').classList.add('on');
+    else if (view === 'stats' || view === 'difficult') $('tab-stats').classList.add('on');
 
-  // Update header progress
-  let totalWords = 0, masteredWords = 0;
-  for (const lvl in HSK) {
-    totalWords += HSK[lvl].length;
-    masteredWords += getProgress(lvl).mastered.size;
+    // Update header progress
+    let totalWords = 0, masteredWords = 0;
+    for (const lvl in HSK) {
+      if (HSK[lvl]) {
+        totalWords += HSK[lvl].length;
+        masteredWords += getProgress(lvl).mastered.size;
+      }
+    }
+    $('totalProgress').textContent = totalWords > 0 ? Math.round((masteredWords / totalWords) * 100) + '%' : '0%';
+
+    if (view === 'levels') renderLevels(m);
+    else if (view === 'levelDetail') renderLevelDetail(m);
+    else if (view === 'study') renderStudy(m);
+    else if (view === 'add') renderAdd(m);
+    else if (view === 'stats') renderStats(m);
+    else if (view === 'difficult') renderDifficult(m);
+  } catch (err) {
+    console.error('Render error:', err);
   }
-  $('totalProgress').textContent = totalWords > 0 ? Math.round((masteredWords / totalWords) * 100) + '%' : '0%';
-
-  if (view === 'levels') renderLevels(m);
-  else if (view === 'levelDetail') renderLevelDetail(m);
-  else if (view === 'study') renderStudy(m);
-  else if (view === 'add') renderAdd(m);
-  else if (view === 'stats') renderStats(m);
-  else if (view === 'difficult') renderDifficult(m);
 }
 
 function renderLevels(m) {
@@ -560,51 +566,61 @@ function renderLevelDetail(m) {
   const studyAllBtn = $('studyAll');
   const backBtn = $('backToLevels');
 
+  console.log('Study buttons found:', { studyDue: !!studyDueBtn, studyNew: !!studyNewBtn, studyReview: !!studyReviewBtn, studyAll: !!studyAllBtn, back: !!backBtn });
+
   if (studyDueBtn) {
     studyDueBtn.onclick = () => {
-      queue = shuffle(dueWords);
-      sessionStats = { correct: 0, again: 0 };
-      flipped = false;
-      typingAnswer = '';
-      typingChecked = false;
-      view = 'study';
-      render();
+      try {
+        queue = shuffle(dueWords);
+        sessionStats = { correct: 0, again: 0 };
+        flipped = false;
+        typingAnswer = '';
+        typingChecked = false;
+        view = 'study';
+        render();
+      } catch (err) { console.error('Study due error:', err); }
     };
   }
 
   if (studyNewBtn) {
     studyNewBtn.onclick = () => {
-      queue = shuffle(newWords.slice(0, 20));
-      sessionStats = { correct: 0, again: 0 };
-      flipped = false;
-      typingAnswer = '';
-      typingChecked = false;
-      view = 'study';
-      render();
+      try {
+        queue = shuffle(newWords.slice(0, 20));
+        sessionStats = { correct: 0, again: 0 };
+        flipped = false;
+        typingAnswer = '';
+        typingChecked = false;
+        view = 'study';
+        render();
+      } catch (err) { console.error('Study new error:', err); }
     };
   }
 
   if (studyReviewBtn) {
     studyReviewBtn.onclick = () => {
-      queue = shuffle(reviewWords);
-      sessionStats = { correct: 0, again: 0 };
-      flipped = false;
-      typingAnswer = '';
-      typingChecked = false;
-      view = 'study';
-      render();
+      try {
+        queue = shuffle(reviewWords);
+        sessionStats = { correct: 0, again: 0 };
+        flipped = false;
+        typingAnswer = '';
+        typingChecked = false;
+        view = 'study';
+        render();
+      } catch (err) { console.error('Study review error:', err); }
     };
   }
 
   if (studyAllBtn) {
     studyAllBtn.onclick = () => {
-      queue = shuffle(words);
-      sessionStats = { correct: 0, again: 0 };
-      flipped = false;
-      typingAnswer = '';
-      typingChecked = false;
-      view = 'study';
-      render();
+      try {
+        queue = shuffle(words);
+        sessionStats = { correct: 0, again: 0 };
+        flipped = false;
+        typingAnswer = '';
+        typingChecked = false;
+        view = 'study';
+        render();
+      } catch (err) { console.error('Study all error:', err); }
     };
   }
 
@@ -617,6 +633,7 @@ function renderLevelDetail(m) {
 }
 
 function renderStudy(m) {
+  console.log('renderStudy called, queue length:', queue.length, 'level:', currentLevel);
   const cur = queue[0];
   const lvl = currentLevel;
   const isCustom = lvl === 'custom';
@@ -642,7 +659,8 @@ function renderStudy(m) {
           <button class="btn" id="backToAdd">Back to Custom Cards</button>
         </div>`;
 
-      $('backToAdd').onclick = () => { view = 'add'; render(); };
+      const backBtn = $('backToAdd');
+      if (backBtn) backBtn.onclick = () => { view = 'add'; render(); };
       return;
     }
 
@@ -667,14 +685,10 @@ function renderStudy(m) {
         <button class="btn ghost" id="backToLevel">Back to Level ${lvl}</button>
       </div>`;
 
-    $('continueStudy').onclick = () => {
-      view = 'levelDetail';
-      render();
-    };
-    $('backToLevel').onclick = () => {
-      view = 'levelDetail';
-      render();
-    };
+    const continueBtn = $('continueStudy');
+    const backLvlBtn = $('backToLevel');
+    if (continueBtn) continueBtn.onclick = () => { view = 'levelDetail'; render(); };
+    if (backLvlBtn) backLvlBtn.onclick = () => { view = 'levelDetail'; render(); };
     return;
   }
 
@@ -793,7 +807,8 @@ function renderTypingMode(m, cur, lvl) {
     };
   }
 
-  $('spkBtn').onclick = (e) => { e.stopPropagation(); speak(cur.h); };
+  const spkBtnEl = $('spkBtn');
+  if (spkBtnEl) spkBtnEl.onclick = (e) => { e.stopPropagation(); speak(cur.h); };
 
   const checkBtn = $('checkAnswer');
   if (checkBtn) {
@@ -913,15 +928,18 @@ function renderStats(m) {
     viewDiff.onclick = () => { view = 'difficult'; render(); };
   }
 
-  $('resetProgress').onclick = () => {
-    if (confirm('Are you sure you want to reset all progress? This cannot be undone.')) {
-      progress = {};
-      srsData = {};
-      saveProgress();
-      saveSRS();
-      render();
-    }
-  };
+  const resetBtn = $('resetProgress');
+  if (resetBtn) {
+    resetBtn.onclick = () => {
+      if (confirm('Are you sure you want to reset all progress? This cannot be undone.')) {
+        progress = {};
+        srsData = {};
+        saveProgress();
+        saveSRS();
+        render();
+      }
+    };
+  }
 }
 
 function renderDifficult(m) {
@@ -965,7 +983,8 @@ function renderDifficult(m) {
     };
   }
 
-  $('backToStats').onclick = () => { view = 'stats'; render(); };
+  const backStatsBtn = $('backToStats');
+  if (backStatsBtn) backStatsBtn.onclick = () => { view = 'stats'; render(); };
 }
 
 function renderAdd(m) {
@@ -1010,20 +1029,23 @@ function renderAdd(m) {
       ${customCards.length > 0 ? '<button class="btn ghost" id="studyCustom" style="margin-top:12px">Study Custom Cards</button>' : ''}
     </div>`;
 
-  $('addCardBtn').onclick = () => {
-    const h = $('addHanzi').value.trim();
-    const p = $('addPinyin').value.trim();
-    const e = $('addEnglish').value.trim();
+  const addBtn = $('addCardBtn');
+  if (addBtn) {
+    addBtn.onclick = () => {
+      const h = $('addHanzi').value.trim();
+      const p = $('addPinyin').value.trim();
+      const e = $('addEnglish').value.trim();
 
-    if (!h || !p || !e) {
-      alert('Please fill in all fields');
-      return;
-    }
+      if (!h || !p || !e) {
+        alert('Please fill in all fields');
+        return;
+      }
 
-    customCards.push({ h, p, e });
-    saveCustomCards();
-    render();
-  };
+      customCards.push({ h, p, e });
+      saveCustomCards();
+      render();
+    };
+  }
 
   m.querySelectorAll('.del').forEach(btn => {
     btn.onclick = () => {
