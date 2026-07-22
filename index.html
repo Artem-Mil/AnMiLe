@@ -10,18 +10,21 @@
     color-scheme:light dark;
     --paper:#F5F3EC; --ink:#211F1C; --faint:#8A8578; --line:#DDD8CC;
     --seal:#BE3A2B; --seal-dark:#9E2F23; --card:#FFFFFF;
-    --green:#3E6B3A; --gold:#B8860B;
+    --green:#3E6B3A; --gold:#B8860B; --orange:#D4740B;
     --ui:'Avenir Next','Helvetica Neue',system-ui,sans-serif;
     --han:'Kaiti SC','STKaiti','KaiTi','Noto Serif SC',serif;
   }
-  @media (prefers-color-scheme: dark){
-    :root{
+  [data-theme="dark"], @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
       --paper:#201E1B; --ink:#EDE9E0; --faint:#9A9385; --line:#3B382F;
       --seal:#C64B3B; --seal-dark:#E08573; --card:#2B2823;
-      --green:#5A9B52; --gold:#DAA520;
+      --green:#5A9B52; --gold:#DAA520; --orange:#E8922B;
     }
-    .banner{background:#4A2521 !important;color:#F5B8AC !important}
-    .seal{box-shadow:2px 2px 0 rgba(0,0,0,.4)}
+  }
+  [data-theme="dark"]{
+    --paper:#201E1B; --ink:#EDE9E0; --faint:#9A9385; --line:#3B382F;
+    --seal:#C64B3B; --seal-dark:#E08573; --card:#2B2823;
+    --green:#5A9B52; --gold:#DAA520; --orange:#E8922B;
   }
   html{background:var(--paper)}
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -30,25 +33,29 @@
   #app{max-width:520px;width:100%;margin:0 auto;flex:1;display:flex;flex-direction:column;min-height:100vh}
   header{padding:calc(env(safe-area-inset-top) + 18px) 20px 12px;display:flex;align-items:center;
          justify-content:space-between;border-bottom:1px solid var(--line)}
+  .header-left{display:flex;align-items:center;gap:12px}
   .logo-han{font-family:var(--han);font-size:26px;line-height:1}
   .logo-sub{font-size:11px;letter-spacing:.18em;color:var(--faint);margin-top:4px}
+  .theme-toggle{width:36px;height:36px;border-radius:8px;border:1.5px solid var(--line);background:var(--card);
+                font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center}
   .seal{width:46px;height:46px;background:var(--seal);border-radius:6px;display:flex;align-items:center;
         justify-content:center;color:#fff;font-family:var(--han);font-size:17px;box-shadow:2px 2px 0 var(--line)}
   main{flex:1;display:flex;flex-direction:column;padding:20px;overflow-y:auto}
   nav{display:flex;border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom);background:var(--paper)}
   nav button{flex:1;padding:15px 0;background:none;border:none;border-top:3px solid transparent;
-             color:var(--faint);font-family:var(--ui);font-size:13px;letter-spacing:.12em;cursor:pointer}
+             color:var(--faint);font-family:var(--ui);font-size:12px;letter-spacing:.1em;cursor:pointer}
   nav button.on{border-top-color:var(--seal);color:var(--ink)}
   .hint{font-size:14px;color:var(--faint);margin-bottom:12px}
   .btn{display:block;width:100%;padding:16px 24px;border-radius:10px;border:none;background:var(--seal);
        color:#fff;font-family:var(--ui);font-size:16px;font-weight:600;cursor:pointer;margin-top:12px}
   .btn:disabled{opacity:.45;cursor:not-allowed}
   .btn.ghost{background:transparent;border:1.5px solid var(--line);color:var(--ink)}
+  .btn.orange{background:var(--orange)}
   .center{margin:auto 0;text-align:center;display:flex;flex-direction:column;gap:18px}
   .huge{font-family:var(--han);font-size:72px}
-  .pill-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
-  .pill{padding:10px 18px;border-radius:999px;border:1.5px solid var(--line);background:transparent;
-        color:var(--ink);font-size:14px;font-weight:600;cursor:pointer;font-family:var(--ui)}
+  .pill-row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+  .pill{padding:8px 14px;border-radius:999px;border:1.5px solid var(--line);background:transparent;
+        color:var(--ink);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--ui)}
   .pill.on{border-color:var(--seal);background:var(--seal);color:#fff}
   .hidden{display:none !important}
 
@@ -91,6 +98,14 @@
   .again{border:1.5px solid var(--line);background:transparent;color:var(--ink)}
   .gotit{border:none;background:var(--seal);color:#fff}
 
+  /* Typing mode */
+  .typing-input{width:100%;padding:16px;border:2px solid var(--line);border-radius:12px;font-size:20px;
+                text-align:center;background:var(--card);color:var(--ink);font-family:var(--ui);outline:none}
+  .typing-input:focus{border-color:var(--seal)}
+  .typing-input.correct{border-color:var(--green);background:rgba(62,107,58,0.1)}
+  .typing-input.wrong{border-color:var(--seal);background:rgba(190,58,43,0.1)}
+  .typing-hint{font-size:14px;color:var(--faint);margin-top:8px}
+
   /* Stats */
   .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
   .stat-card{background:var(--card);border:1.5px solid var(--line);border-radius:12px;padding:16px;text-align:center}
@@ -114,6 +129,10 @@
                     font-size:18px;cursor:pointer;border-radius:6px}
   .custom-card .del:hover{background:var(--line);color:var(--seal)}
 
+  /* Difficult word badge */
+  .difficult-badge{display:inline-block;background:var(--orange);color:#fff;font-size:10px;padding:2px 6px;
+                   border-radius:4px;margin-left:8px;font-weight:600}
+
   @media (prefers-reduced-motion: no-preference){
     .flash{transition:transform .08s ease}
     .flash:active{transform:scale(.985)}
@@ -125,9 +144,12 @@
 <body>
 <div id="app">
   <header>
-    <div>
-      <div class="logo-han">字卡</div>
-      <div class="logo-sub">HSK · FLASHCARDS</div>
+    <div class="header-left">
+      <button class="theme-toggle" id="themeToggle" title="Toggle theme">☀️</button>
+      <div>
+        <div class="logo-han">字卡</div>
+        <div class="logo-sub">HSK · FLASHCARDS</div>
+      </div>
     </div>
     <div class="seal" id="totalProgress">0%</div>
   </header>
@@ -148,11 +170,24 @@
 const $=id=>document.getElementById(id);
 const esc=s=>(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
+// Normalize pinyin for comparison (remove tone marks, lowercase)
+function normalizePinyin(s) {
+  return (s||'').toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/ā|á|ǎ|à/g, 'a').replace(/ē|é|ě|è/g, 'e')
+    .replace(/ī|í|ǐ|ì/g, 'i').replace(/ō|ó|ǒ|ò/g, 'o')
+    .replace(/ū|ú|ǔ|ù/g, 'u').replace(/ǖ|ǘ|ǚ|ǜ|ü/g, 'v')
+    .replace(/\s+/g, '').trim();
+}
+
 // ---------- Storage ----------
-const PROGRESS_KEY = 'hsk-progress-v1';
+const PROGRESS_KEY = 'hsk-progress-v2';
 const CUSTOM_KEY = 'hsk-custom-v1';
+const SRS_KEY = 'hsk-srs-v1';
+const THEME_KEY = 'hsk-theme';
 let progress = {};  // { level: { mastered: Set, seen: Set } }
-let customCards = [];  // [{ h, p, e }]
+let srsData = {};   // { "level:hanzi": { interval: days, nextReview: timestamp, againCount: number } }
+let customCards = [];
 let storageOk = true;
 
 function loadProgress() {
@@ -181,6 +216,70 @@ function saveProgress() {
     }
     localStorage.setItem(PROGRESS_KEY, JSON.stringify(data));
   } catch(e) { storageOk = false; }
+}
+
+function loadSRS() {
+  try {
+    const raw = localStorage.getItem(SRS_KEY);
+    if (raw) srsData = JSON.parse(raw);
+  } catch(e) { storageOk = false; }
+}
+
+function saveSRS() {
+  try {
+    localStorage.setItem(SRS_KEY, JSON.stringify(srsData));
+  } catch(e) { storageOk = false; }
+}
+
+function getSRS(level, hanzi) {
+  const key = `${level}:${hanzi}`;
+  if (!srsData[key]) srsData[key] = { interval: 0, nextReview: 0, againCount: 0 };
+  return srsData[key];
+}
+
+function updateSRS(level, hanzi, gotIt) {
+  const srs = getSRS(level, hanzi);
+  const now = Date.now();
+  if (gotIt) {
+    // Increase interval: 0->1->3->7->14->30
+    const intervals = [1, 3, 7, 14, 30];
+    const idx = intervals.indexOf(srs.interval);
+    srs.interval = intervals[Math.min(idx + 1, intervals.length - 1)] || 1;
+  } else {
+    srs.interval = 1;
+    srs.againCount = (srs.againCount || 0) + 1;
+  }
+  srs.nextReview = now + srs.interval * 24 * 60 * 60 * 1000;
+  saveSRS();
+}
+
+function isDueForReview(level, hanzi) {
+  const srs = getSRS(level, hanzi);
+  return srs.interval > 0 && Date.now() >= srs.nextReview;
+}
+
+function isDifficult(level, hanzi) {
+  const srs = getSRS(level, hanzi);
+  return (srs.againCount || 0) >= 3;
+}
+
+function getDifficultWords() {
+  const difficult = [];
+  for (const key in srsData) {
+    if ((srsData[key].againCount || 0) >= 3) {
+      const [lvl, h] = key.split(':');
+      const words = HSK[lvl] || [];
+      const word = words.find(w => w.h === h);
+      if (word) difficult.push({ ...word, level: lvl });
+    }
+  }
+  return difficult;
+}
+
+function getDueWords(level) {
+  const words = HSK[level] || [];
+  const p = getProgress(level);
+  return words.filter(w => p.seen.has(w.h) && isDueForReview(level, w.h));
 }
 
 function loadCustomCards() {
@@ -227,10 +326,39 @@ function isTierUnlocked(tier) {
   return false;
 }
 
-function isLevelUnlocked(level) {
-  const info = HSK_INFO[level];
-  if (!info) return false;
-  return isTierUnlocked(info.tier);
+// ---------- Theme ----------
+function loadTheme() {
+  const saved = localStorage.getItem(THEME_KEY);
+  if (saved) {
+    document.documentElement.setAttribute('data-theme', saved);
+    updateThemeIcon(saved);
+  } else {
+    updateThemeIcon(null);
+  }
+}
+
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  let next;
+  if (!current) {
+    next = prefersDark ? 'light' : 'dark';
+  } else if (current === 'dark') {
+    next = 'light';
+  } else {
+    next = 'dark';
+  }
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem(THEME_KEY, next);
+  updateThemeIcon(next);
+}
+
+function updateThemeIcon(theme) {
+  const btn = $('themeToggle');
+  if (!btn) return;
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const isDark = theme === 'dark' || (!theme && prefersDark);
+  btn.textContent = isDark ? '☀️' : '🌙';
 }
 
 // ---------- Voice ----------
@@ -258,6 +386,9 @@ let currentLevel = null;
 let queue = [];
 let flipped = false;
 let front = 'pinyin';
+let studyMode = 'flashcard'; // 'flashcard' or 'typing'
+let typingAnswer = '';
+let typingChecked = false;
 let sessionStats = { correct: 0, again: 0 };
 
 // ---------- Shuffle ----------
@@ -277,9 +408,9 @@ function render() {
   // Update nav
   document.querySelectorAll('nav button').forEach(b => b.classList.remove('on'));
   if (view === 'levels') $('tab-levels').classList.add('on');
-  else if (view.startsWith('study')) $('tab-study').classList.add('on');
+  else if (view.startsWith('study') || view === 'levelDetail') $('tab-study').classList.add('on');
   else if (view === 'add') $('tab-add').classList.add('on');
-  else if (view === 'stats') $('tab-stats').classList.add('on');
+  else if (view === 'stats' || view === 'difficult') $('tab-stats').classList.add('on');
 
   // Update header progress
   let totalWords = 0, masteredWords = 0;
@@ -294,6 +425,7 @@ function render() {
   else if (view === 'study') renderStudy(m);
   else if (view === 'add') renderAdd(m);
   else if (view === 'stats') renderStats(m);
+  else if (view === 'difficult') renderDifficult(m);
 }
 
 function renderLevels(m) {
@@ -319,12 +451,13 @@ function renderLevels(m) {
       const pct = getMasteryPercent(lvl);
       const completed = pct >= 100;
       const locked = !unlocked;
+      const dueCount = getDueWords(lvl).length;
 
       html += `
         <div class="level-card ${locked ? 'locked' : ''} ${completed ? 'completed' : ''}" data-level="${lvl}">
           <div class="level-icon">${lvl}</div>
           <div class="level-info">
-            <div class="level-name">HSK Level ${lvl}</div>
+            <div class="level-name">HSK Level ${lvl}${dueCount > 0 ? `<span class="difficult-badge" style="background:var(--gold)">${dueCount} due</span>` : ''}</div>
             <div class="level-meta">${words} words · ${pct}% mastered</div>
             <div class="level-progress"><div class="level-progress-bar" style="width:${pct}%"></div></div>
           </div>
@@ -351,6 +484,7 @@ function renderLevelDetail(m) {
   const pct = getMasteryPercent(lvl);
   const newWords = words.filter(w => !p.seen.has(w.h));
   const reviewWords = words.filter(w => p.seen.has(w.h) && !p.mastered.has(w.h));
+  const dueWords = getDueWords(lvl);
 
   m.innerHTML = `
     <div class="center">
@@ -368,35 +502,60 @@ function renderLevelDetail(m) {
           <div class="stat-label">Review</div>
         </div>
         <div class="stat-card">
+          <div class="stat-num">${dueWords.length}</div>
+          <div class="stat-label">Due (SRS)</div>
+        </div>
+        <div class="stat-card">
           <div class="stat-num">${p.mastered.size}</div>
           <div class="stat-label">Mastered</div>
         </div>
-        <div class="stat-card">
-          <div class="stat-num">${p.seen.size}</div>
-          <div class="stat-label">Seen</div>
-        </div>
       </div>
 
+      <div class="tier-title" style="text-align:center">Study Mode</div>
       <div class="pill-row">
-        <button class="pill ${front==='pinyin'?'on':''}" id="fPin">Pinyin first</button>
-        <button class="pill ${front==='hanzi'?'on':''}" id="fHan">汉字 first</button>
-        <button class="pill ${front==='english'?'on':''}" id="fEng">English first</button>
+        <button class="pill ${studyMode==='flashcard'?'on':''}" id="mFlash">Flashcard</button>
+        <button class="pill ${studyMode==='typing'?'on':''}" id="mType">Type Pinyin</button>
       </div>
 
-      <button class="btn" id="studyNew" ${newWords.length === 0 ? 'disabled' : ''}>Learn New Words (${newWords.length})</button>
+      <div class="tier-title" style="text-align:center">Card Front</div>
+      <div class="pill-row">
+        <button class="pill ${front==='pinyin'?'on':''}" id="fPin">Pinyin</button>
+        <button class="pill ${front==='hanzi'?'on':''}" id="fHan">汉字</button>
+        <button class="pill ${front==='english'?'on':''}" id="fEng">English</button>
+      </div>
+
+      ${dueWords.length > 0 ? `<button class="btn orange" id="studyDue">Review Due Words (${dueWords.length})</button>` : ''}
+      <button class="btn" id="studyNew" ${newWords.length === 0 ? 'disabled' : ''}>Learn New (${newWords.length})</button>
       <button class="btn ghost" id="studyReview" ${reviewWords.length === 0 ? 'disabled' : ''}>Review (${reviewWords.length})</button>
       <button class="btn ghost" id="studyAll">Study All (${words.length})</button>
       <button class="btn ghost" id="backToLevels">← Back to Levels</button>
     </div>`;
 
+  $('mFlash').onclick = () => { studyMode = 'flashcard'; render(); };
+  $('mType').onclick = () => { studyMode = 'typing'; render(); };
   $('fHan').onclick = () => { front = 'hanzi'; render(); };
   $('fPin').onclick = () => { front = 'pinyin'; render(); };
   $('fEng').onclick = () => { front = 'english'; render(); };
 
+  const studyDueBtn = $('studyDue');
+  if (studyDueBtn) {
+    studyDueBtn.onclick = () => {
+      queue = shuffle(dueWords);
+      sessionStats = { correct: 0, again: 0 };
+      flipped = false;
+      typingAnswer = '';
+      typingChecked = false;
+      view = 'study';
+      render();
+    };
+  }
+
   $('studyNew').onclick = () => {
-    queue = shuffle(newWords.slice(0, 20));  // Learn 20 new words at a time
+    queue = shuffle(newWords.slice(0, 20));
     sessionStats = { correct: 0, again: 0 };
     flipped = false;
+    typingAnswer = '';
+    typingChecked = false;
     view = 'study';
     render();
   };
@@ -405,6 +564,8 @@ function renderLevelDetail(m) {
     queue = shuffle(reviewWords);
     sessionStats = { correct: 0, again: 0 };
     flipped = false;
+    typingAnswer = '';
+    typingChecked = false;
     view = 'study';
     render();
   };
@@ -413,6 +574,8 @@ function renderLevelDetail(m) {
     queue = shuffle(words);
     sessionStats = { correct: 0, again: 0 };
     flipped = false;
+    typingAnswer = '';
+    typingChecked = false;
     view = 'study';
     render();
   };
@@ -453,7 +616,6 @@ function renderStudy(m) {
       return;
     }
 
-    const p = getProgress(lvl);
     const pct = getMasteryPercent(lvl);
 
     m.innerHTML = `
@@ -486,6 +648,13 @@ function renderStudy(m) {
     return;
   }
 
+  // Typing mode
+  if (studyMode === 'typing' && !isCustom) {
+    renderTypingMode(m, cur, lvl);
+    return;
+  }
+
+  // Flashcard mode
   const done = sessionStats.correct + sessionStats.again;
   const face = !flipped
     ? (front === 'hanzi' ? `<div class="big-han">${esc(cur.h)}</div>`
@@ -496,11 +665,12 @@ function renderStudy(m) {
        <div class="mid-eng">${esc(cur.e)}</div>`;
 
   const levelLabel = isCustom ? 'CUSTOM' : `HSK ${lvl}`;
+  const difficultTag = !isCustom && isDifficult(lvl, cur.h) ? '<span class="difficult-badge">HARD</span>' : '';
 
   m.innerHTML = `
     <div class="prog">${done} / ${total} · ${queue.length} left</div>
     <div class="flash" id="flash">
-      <div class="level-tag">${levelLabel}</div>
+      <div class="level-tag">${levelLabel} ${difficultTag}</div>
       <div class="tag">${flipped ? 'ANSWER' : 'TAP TO FLIP'}</div>
       ${face}
       ${(flipped || front === 'hanzi') ? '<button class="spk" id="spkBtn" aria-label="Play pronunciation">🔊</button>' : ''}
@@ -519,11 +689,12 @@ function renderStudy(m) {
     if (!isCustom) {
       const p = getProgress(lvl);
       p.seen.add(cur.h);
+      updateSRS(lvl, cur.h, false);
       saveProgress();
     }
 
     const [c, ...rest] = queue;
-    queue = [...rest, c];  // Move to back
+    queue = [...rest, c];
     sessionStats.again++;
     flipped = false;
     render();
@@ -534,6 +705,7 @@ function renderStudy(m) {
       const p = getProgress(lvl);
       p.seen.add(cur.h);
       p.mastered.add(cur.h);
+      updateSRS(lvl, cur.h, true);
       saveProgress();
     }
 
@@ -542,6 +714,91 @@ function renderStudy(m) {
     flipped = false;
     render();
   };
+}
+
+function renderTypingMode(m, cur, lvl) {
+  const done = sessionStats.correct + sessionStats.again;
+  const total = queue.length + sessionStats.correct + sessionStats.again;
+  const difficultTag = isDifficult(lvl, cur.h) ? '<span class="difficult-badge">HARD</span>' : '';
+
+  const isCorrect = typingChecked && normalizePinyin(typingAnswer) === normalizePinyin(cur.p);
+  const inputClass = typingChecked ? (isCorrect ? 'correct' : 'wrong') : '';
+
+  m.innerHTML = `
+    <div class="prog">${done} / ${total} · ${queue.length} left</div>
+    <div class="flash">
+      <div class="level-tag">HSK ${lvl} ${difficultTag}</div>
+      <div class="tag">TYPE PINYIN</div>
+      <div class="big-han">${esc(cur.h)}</div>
+      ${typingChecked ? `<div class="mid-eng">${esc(cur.e)}</div>` : ''}
+      <button class="spk" id="spkBtn" aria-label="Play pronunciation">🔊</button>
+    </div>
+    <input type="text" class="typing-input ${inputClass}" id="typingInput"
+           value="${esc(typingAnswer)}" placeholder="Type pinyin..."
+           ${typingChecked ? 'disabled' : ''} autocomplete="off" autocapitalize="none">
+    ${typingChecked ? `<div class="typing-hint">Correct: <strong>${esc(cur.p)}</strong></div>` : ''}
+    <div class="answers">
+      ${typingChecked
+        ? `<button class="again" id="aAgain">Again</button>
+           <button class="gotit" id="aGot">${isCorrect ? 'Continue' : 'Got it anyway'}</button>`
+        : `<button class="btn" id="checkAnswer">Check Answer</button>`}
+    </div>`;
+
+  const input = $('typingInput');
+  if (!typingChecked && input) {
+    input.focus();
+    input.oninput = (e) => { typingAnswer = e.target.value; };
+    input.onkeydown = (e) => {
+      if (e.key === 'Enter') {
+        typingChecked = true;
+        render();
+      }
+    };
+  }
+
+  $('spkBtn').onclick = (e) => { e.stopPropagation(); speak(cur.h); };
+
+  const checkBtn = $('checkAnswer');
+  if (checkBtn) {
+    checkBtn.onclick = () => {
+      typingChecked = true;
+      render();
+    };
+  }
+
+  const againBtn = $('aAgain');
+  if (againBtn) {
+    againBtn.onclick = () => {
+      const p = getProgress(lvl);
+      p.seen.add(cur.h);
+      updateSRS(lvl, cur.h, false);
+      saveProgress();
+
+      const [c, ...rest] = queue;
+      queue = [...rest, c];
+      sessionStats.again++;
+      typingAnswer = '';
+      typingChecked = false;
+      render();
+    };
+  }
+
+  const gotBtn = $('aGot');
+  if (gotBtn) {
+    gotBtn.onclick = () => {
+      const p = getProgress(lvl);
+      p.seen.add(cur.h);
+      p.mastered.add(cur.h);
+      updateSRS(lvl, cur.h, true);
+      saveProgress();
+
+      queue = queue.slice(1);
+      sessionStats.correct++;
+      typingAnswer = '';
+      typingChecked = false;
+      render();
+    };
+  }
 }
 
 function renderStats(m) {
@@ -556,6 +813,7 @@ function renderStats(m) {
 
   const elemMastery = getTierMastery('elementary');
   const intMastery = getTierMastery('intermediate');
+  const difficultWords = getDifficultWords();
 
   m.innerHTML = `
     <div style="padding:10px 0">
@@ -598,17 +856,79 @@ function renderStats(m) {
         ${elemMastery < 80 ? '<span class="lock-icon">🔒</span>' : ''}
       </div>
 
-      <div class="tier-title">Reset Progress</div>
+      ${difficultWords.length > 0 ? `
+        <div class="tier-title">Difficult Words</div>
+        <div class="level-card" id="viewDifficult" style="cursor:pointer">
+          <div class="level-icon" style="background:var(--orange)">!</div>
+          <div class="level-info">
+            <div class="level-name">Words You Struggle With</div>
+            <div class="level-meta">${difficultWords.length} difficult words</div>
+          </div>
+        </div>
+      ` : ''}
+
+      <div class="tier-title">Reset Data</div>
       <button class="btn ghost" id="resetProgress">Reset All Progress</button>
     </div>`;
+
+  const viewDiff = $('viewDifficult');
+  if (viewDiff) {
+    viewDiff.onclick = () => { view = 'difficult'; render(); };
+  }
 
   $('resetProgress').onclick = () => {
     if (confirm('Are you sure you want to reset all progress? This cannot be undone.')) {
       progress = {};
+      srsData = {};
       saveProgress();
+      saveSRS();
       render();
     }
   };
+}
+
+function renderDifficult(m) {
+  const difficult = getDifficultWords();
+
+  let cardsHtml = '';
+  for (const w of difficult) {
+    const srs = getSRS(w.level, w.h);
+    cardsHtml += `
+      <div class="custom-card">
+        <div class="han">${esc(w.h)}</div>
+        <div class="details">
+          <div class="pin">${esc(w.p)} <span style="color:var(--faint);font-size:12px">HSK ${w.level}</span></div>
+          <div class="eng">${esc(w.e)}</div>
+          <div style="font-size:11px;color:var(--orange);margin-top:4px">Missed ${srs.againCount}× times</div>
+        </div>
+      </div>`;
+  }
+
+  m.innerHTML = `
+    <div style="padding:10px 0">
+      <div class="tier-title" style="margin-top:0">Difficult Words (${difficult.length})</div>
+      <div class="hint">Words you've pressed "Again" on 3+ times</div>
+      ${cardsHtml}
+      ${difficult.length > 0 ? '<button class="btn" id="studyDifficult">Study Difficult Words</button>' : ''}
+      <button class="btn ghost" id="backToStats">← Back to Stats</button>
+    </div>`;
+
+  const studyBtn = $('studyDifficult');
+  if (studyBtn) {
+    studyBtn.onclick = () => {
+      // Study difficult words across all levels
+      currentLevel = difficult[0]?.level || 1;
+      queue = shuffle(difficult.map(d => ({ h: d.h, p: d.p, e: d.e, _level: d.level })));
+      sessionStats = { correct: 0, again: 0 };
+      flipped = false;
+      typingAnswer = '';
+      typingChecked = false;
+      view = 'study';
+      render();
+    };
+  }
+
+  $('backToStats').onclick = () => { view = 'stats'; render(); };
 }
 
 function renderAdd(m) {
@@ -702,10 +1022,13 @@ $('tab-study').onclick = () => {
 };
 $('tab-add').onclick = () => { view = 'add'; render(); };
 $('tab-stats').onclick = () => { view = 'stats'; render(); };
+$('themeToggle').onclick = toggleTheme;
 
 // ---------- Init ----------
 loadProgress();
 loadCustomCards();
+loadSRS();
+loadTheme();
 render();
 
 // Preload voices
