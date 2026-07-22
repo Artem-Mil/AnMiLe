@@ -486,7 +486,13 @@ function renderLevelDetail(m) {
   const reviewWords = words.filter(w => p.seen.has(w.h) && !p.mastered.has(w.h));
   const dueWords = getDueWords(lvl);
 
-  m.innerHTML = `
+  const flashOn = studyMode === 'flashcard' ? 'on' : '';
+  const typeOn = studyMode === 'typing' ? 'on' : '';
+  const pinOn = front === 'pinyin' ? 'on' : '';
+  const hanOn = front === 'hanzi' ? 'on' : '';
+  const engOn = front === 'english' ? 'on' : '';
+
+  let html = `
     <div class="center">
       <div class="huge" style="color:var(--seal)">${lvl}</div>
       <div style="font-size:20px;font-weight:600">HSK Level ${lvl}</div>
@@ -513,31 +519,47 @@ function renderLevelDetail(m) {
 
       <div class="tier-title" style="text-align:center">Study Mode</div>
       <div class="pill-row">
-        <button class="pill ${studyMode==='flashcard'?'on':''}" id="mFlash">Flashcard</button>
-        <button class="pill ${studyMode==='typing'?'on':''}" id="mType">Type Pinyin</button>
+        <button class="pill ${flashOn}" id="mFlash">Flashcard</button>
+        <button class="pill ${typeOn}" id="mType">Type Pinyin</button>
       </div>
 
       <div class="tier-title" style="text-align:center">Card Front</div>
       <div class="pill-row">
-        <button class="pill ${front==='pinyin'?'on':''}" id="fPin">Pinyin</button>
-        <button class="pill ${front==='hanzi'?'on':''}" id="fHan">汉字</button>
-        <button class="pill ${front==='english'?'on':''}" id="fEng">English</button>
-      </div>
+        <button class="pill ${pinOn}" id="fPin">Pinyin</button>
+        <button class="pill ${hanOn}" id="fHan">汉字</button>
+        <button class="pill ${engOn}" id="fEng">English</button>
+      </div>`;
 
-      ${dueWords.length > 0 ? `<button class="btn orange" id="studyDue">Review Due Words (${dueWords.length})</button>` : ''}
+  if (dueWords.length > 0) {
+    html += `<button class="btn orange" id="studyDue">Review Due Words (${dueWords.length})</button>`;
+  }
+  html += `
       <button class="btn" id="studyNew" ${newWords.length === 0 ? 'disabled' : ''}>Learn New (${newWords.length})</button>
       <button class="btn ghost" id="studyReview" ${reviewWords.length === 0 ? 'disabled' : ''}>Review (${reviewWords.length})</button>
       <button class="btn ghost" id="studyAll">Study All (${words.length})</button>
       <button class="btn ghost" id="backToLevels">← Back to Levels</button>
     </div>`;
 
-  $('mFlash').onclick = () => { studyMode = 'flashcard'; render(); };
-  $('mType').onclick = () => { studyMode = 'typing'; render(); };
-  $('fHan').onclick = () => { front = 'hanzi'; render(); };
-  $('fPin').onclick = () => { front = 'pinyin'; render(); };
-  $('fEng').onclick = () => { front = 'english'; render(); };
+  m.innerHTML = html;
+
+  const mFlash = $('mFlash');
+  const mType = $('mType');
+  const fHan = $('fHan');
+  const fPin = $('fPin');
+  const fEng = $('fEng');
+
+  if (mFlash) mFlash.onclick = () => { studyMode = 'flashcard'; render(); };
+  if (mType) mType.onclick = () => { studyMode = 'typing'; render(); };
+  if (fHan) fHan.onclick = () => { front = 'hanzi'; render(); };
+  if (fPin) fPin.onclick = () => { front = 'pinyin'; render(); };
+  if (fEng) fEng.onclick = () => { front = 'english'; render(); };
 
   const studyDueBtn = $('studyDue');
+  const studyNewBtn = $('studyNew');
+  const studyReviewBtn = $('studyReview');
+  const studyAllBtn = $('studyAll');
+  const backBtn = $('backToLevels');
+
   if (studyDueBtn) {
     studyDueBtn.onclick = () => {
       queue = shuffle(dueWords);
@@ -550,40 +572,48 @@ function renderLevelDetail(m) {
     };
   }
 
-  $('studyNew').onclick = () => {
-    queue = shuffle(newWords.slice(0, 20));
-    sessionStats = { correct: 0, again: 0 };
-    flipped = false;
-    typingAnswer = '';
-    typingChecked = false;
-    view = 'study';
-    render();
-  };
+  if (studyNewBtn) {
+    studyNewBtn.onclick = () => {
+      queue = shuffle(newWords.slice(0, 20));
+      sessionStats = { correct: 0, again: 0 };
+      flipped = false;
+      typingAnswer = '';
+      typingChecked = false;
+      view = 'study';
+      render();
+    };
+  }
 
-  $('studyReview').onclick = () => {
-    queue = shuffle(reviewWords);
-    sessionStats = { correct: 0, again: 0 };
-    flipped = false;
-    typingAnswer = '';
-    typingChecked = false;
-    view = 'study';
-    render();
-  };
+  if (studyReviewBtn) {
+    studyReviewBtn.onclick = () => {
+      queue = shuffle(reviewWords);
+      sessionStats = { correct: 0, again: 0 };
+      flipped = false;
+      typingAnswer = '';
+      typingChecked = false;
+      view = 'study';
+      render();
+    };
+  }
 
-  $('studyAll').onclick = () => {
-    queue = shuffle(words);
-    sessionStats = { correct: 0, again: 0 };
-    flipped = false;
-    typingAnswer = '';
-    typingChecked = false;
-    view = 'study';
-    render();
-  };
+  if (studyAllBtn) {
+    studyAllBtn.onclick = () => {
+      queue = shuffle(words);
+      sessionStats = { correct: 0, again: 0 };
+      flipped = false;
+      typingAnswer = '';
+      typingChecked = false;
+      view = 'study';
+      render();
+    };
+  }
 
-  $('backToLevels').onclick = () => {
-    view = 'levels';
-    render();
-  };
+  if (backBtn) {
+    backBtn.onclick = () => {
+      view = 'levels';
+      render();
+    };
+  }
 }
 
 function renderStudy(m) {
@@ -680,40 +710,47 @@ function renderStudy(m) {
       <button class="gotit" id="aGot">Got it</button>
     </div>`;
 
-  $('flash').onclick = () => { flipped = !flipped; render(); };
+  const flashEl = $('flash');
+  const spkBtn = $('spkBtn');
+  const againBtn = $('aAgain');
+  const gotBtn = $('aGot');
 
-  const sb = $('spkBtn');
-  if (sb) sb.onclick = (e) => { e.stopPropagation(); speak(cur.h); };
+  if (flashEl) flashEl.onclick = () => { flipped = !flipped; render(); };
+  if (spkBtn) spkBtn.onclick = (e) => { e.stopPropagation(); speak(cur.h); };
 
-  $('aAgain').onclick = () => {
-    if (!isCustom) {
-      const p = getProgress(lvl);
-      p.seen.add(cur.h);
-      updateSRS(lvl, cur.h, false);
-      saveProgress();
-    }
+  if (againBtn) {
+    againBtn.onclick = () => {
+      if (!isCustom) {
+        const p = getProgress(lvl);
+        p.seen.add(cur.h);
+        updateSRS(lvl, cur.h, false);
+        saveProgress();
+      }
 
-    const [c, ...rest] = queue;
-    queue = [...rest, c];
-    sessionStats.again++;
-    flipped = false;
-    render();
-  };
+      const [c, ...rest] = queue;
+      queue = [...rest, c];
+      sessionStats.again++;
+      flipped = false;
+      render();
+    };
+  }
 
-  $('aGot').onclick = () => {
-    if (!isCustom) {
-      const p = getProgress(lvl);
-      p.seen.add(cur.h);
-      p.mastered.add(cur.h);
-      updateSRS(lvl, cur.h, true);
-      saveProgress();
-    }
+  if (gotBtn) {
+    gotBtn.onclick = () => {
+      if (!isCustom) {
+        const p = getProgress(lvl);
+        p.seen.add(cur.h);
+        p.mastered.add(cur.h);
+        updateSRS(lvl, cur.h, true);
+        saveProgress();
+      }
 
-    queue = queue.slice(1);
-    sessionStats.correct++;
-    flipped = false;
-    render();
-  };
+      queue = queue.slice(1);
+      sessionStats.correct++;
+      flipped = false;
+      render();
+    };
+  }
 }
 
 function renderTypingMode(m, cur, lvl) {
